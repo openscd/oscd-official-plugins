@@ -74,9 +74,17 @@ jobs:
       - name: Install Submodule Dependencies
         if: steps.submodule-cache.outputs.cache-hit != 'true'
         run: | 
+          cd openscd
           npm i @nx/nx-linux-x64-gnu
           npm install
-        working-directory: openscd
+          cd ..
+
+      - name: Verify Submodule Dependencies
+        run: |
+          if [ ! -d "openscd/node_modules" ]; then
+            echo "Error: openscd/node_modules directory does not exist"
+            exit 1
+          fi
 
       - name: Upload Submodule Dependencies
         uses: actions/upload-artifact@v4
