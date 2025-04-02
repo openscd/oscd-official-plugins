@@ -75,8 +75,9 @@ jobs:
         if: steps.submodule-cache.outputs.cache-hit != 'true'
         run: | 
           cd openscd
-          npm i @nx/nx-linux-x64-gnu
+          cat ./package.json
           npm install
+          npm i @nx/nx-linux-x64-gnu
           pwd
           ls -l 
           ls -l node_modules
