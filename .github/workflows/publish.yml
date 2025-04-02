@@ -77,6 +77,8 @@ jobs:
           cd openscd
           npm i @nx/nx-linux-x64-gnu
           npm install
+          pwd
+          ls -l 
           cd ..
 
       - name: Verify Submodule Dependencies
