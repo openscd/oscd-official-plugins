@@ -15,10 +15,8 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  main-deps:
     runs-on: ubuntu-latest
-    outputs:
-      artifact-name: ${{ steps.upload.outputs.artifact-name }}
     steps:
       - name: Checkout Repository (with Submodules)
         uses: actions/checkout@v4
@@ -29,7 +27,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
 
       - name: Cache Main Project Dependencies
         uses: actions/cache@v4
@@ -44,6 +41,24 @@ jobs:
         if: steps.main-cache.outputs.cache-hit != 'true'
         run: npm install
 
+      - name: Upload Main Dependencies
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-deps
+          path: node_modules
+
+  submodule-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository (with Submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       - name: Cache Submodule Dependencies
         uses: actions/cache@v4
@@ -59,6 +74,39 @@ jobs:
         run: npm install
         working-directory: openscd
 
+      - name: Upload Submodule Dependencies
+        uses: actions/upload-artifact@v4
+        with:
+          name: submodule-deps
+          path: openscd/node_modules
+
+  build:
+    needs: [main-deps, submodule-deps]
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.upload.outputs.artifact-name }}
+    steps:
+      - name: Checkout Repository (with Submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Download Main Dependencies
+        uses: actions/download-artifact@v4
+        with:
+          name: main-deps
+          path: node_modules
+
+      - name: Download Submodule Dependencies
+        uses: actions/download-artifact@v4
+        with:
+          name: submodule-deps
+          path: openscd/node_modules
 
       - name: Build Submodule
         run: npm run build
