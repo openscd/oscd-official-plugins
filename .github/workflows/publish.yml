@@ -15,88 +15,7 @@ permissions:
   id-token: write
 
 jobs:
-  main-deps:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository (with Submodules)
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Cache Main Project Dependencies
-        uses: actions/cache@v4
-        id: main-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-main-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-main-node-
-
-      - name: Install Dependencies
-        if: steps.main-cache.outputs.cache-hit != 'true'
-        run: | 
-          npm i @nx/nx-linux-x64-gnu
-          npm install
-
-      - name: Upload Main Dependencies
-        uses: actions/upload-artifact@v4
-        with:
-          name: main-deps
-          path: node_modules
-
-  submodule-deps:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository (with Submodules)
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Cache Submodule Dependencies
-        uses: actions/cache@v4
-        id: submodule-cache
-        with:
-          path: openscd/node_modules
-          key: ${{ runner.os }}-submodule-node-${{ hashFiles('openscd/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-submodule-node-
-
-      - name: Install Submodule Dependencies
-        if: steps.submodule-cache.outputs.cache-hit != 'true'
-        run: | 
-          cd openscd
-          npm i @nx/nx-linux-x64-gnu
-          npm clean-install
-          pwd
-          ls -l 
-          ls -l node_modules
-          cd ..
-
-      - name: Verify Submodule Dependencies
-        run: |
-          if [ ! -d "openscd/node_modules" ]; then
-            echo "Error: openscd/node_modules directory does not exist"
-            exit 1
-          fi
-
-      - name: Upload Submodule Dependencies
-        uses: actions/upload-artifact@v4
-        with:
-          name: submodule-deps
-          path: openscd/node_modules
-
   build:
-    needs: [main-deps, submodule-deps]
     runs-on: ubuntu-latest
     outputs:
       artifact-name: ${{ steps.upload.outputs.artifact-name }}
@@ -111,17 +30,35 @@ jobs:
         with:
           node-version: 18
 
-      - name: Download Main Dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: main-deps
-          path: node_modules
 
-      - name: Download Submodule Dependencies
-        uses: actions/download-artifact@v4
+      - name: Cache Main Project Dependencies
+        uses: actions/cache@v4
+        id: main-cache
         with:
-          name: submodule-deps
+          path: node_modules
+          key: ${{ runner.os }}-main-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-main-node-
+
+      - name: Install Dependencies
+        if: steps.main-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+
+      - name: Cache Submodule Dependencies
+        uses: actions/cache@v4
+        id: submodule-cache
+        with:
           path: openscd/node_modules
+          key: ${{ runner.os }}-submodule-node-${{ hashFiles('openscd/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-submodule-node-
+
+      - name: Install Submodule Dependencies
+        if: steps.submodule-cache.outputs.cache-hit != 'true'
+        run: npm install
+        working-directory: openscd
+
 
       - name: Build Submodule
         run: npm run build
@@ -142,12 +79,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
