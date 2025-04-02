@@ -79,6 +79,7 @@ jobs:
           npm install
           pwd
           ls -l 
+          ls -l node_modules
           cd ..
 
       - name: Verify Submodule Dependencies
