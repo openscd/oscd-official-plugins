@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -28,12 +30,35 @@ jobs:
         with:
           node-version: 18
 
+
+      - name: Cache Main Project Dependencies
+        uses: actions/cache@v4
+        id: main-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-main-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-main-node-
+
       - name: Install Dependencies
+        if: steps.main-cache.outputs.cache-hit != 'true'
         run: npm install
 
+
+      - name: Cache Submodule Dependencies
+        uses: actions/cache@v4
+        id: submodule-cache
+        with:
+          path: openscd/node_modules
+          key: ${{ runner.os }}-submodule-node-${{ hashFiles('openscd/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-submodule-node-
+
       - name: Install Submodule Dependencies
+        if: steps.submodule-cache.outputs.cache-hit != 'true'
         run: npm install
         working-directory: openscd
+
 
       - name: Build Submodule
         run: npm run build
@@ -54,26 +79,9 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages Branch
-        uses: actions/checkout@v4
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          ref: gh-pages
-
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-      - name: Copy Built Files to Plugins Folder
-        run: |
-          mkdir -p plugins
-          cp -r dist/* plugins/
-
-      - name: Commit and Push Changes
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add plugins
-          git commit -m "Deploy latest build to plugins" || echo "No changes to commit"
-          git push origin gh-pages
+          folder: dist
+          branch: gh-pages
+          target-folder: plugins
