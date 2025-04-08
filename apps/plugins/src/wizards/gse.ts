@@ -169,3 +169,38 @@ export function editGseWizard(element: Element): Wizard {
     },
   ];
 }
+
+export function moveGseWizard(element: Element, doc: XMLDocument): Wizard {
+
+  const currentConnectedAP = element.closest('ConnectedAP');
+  const iedName = currentConnectedAP?.getAttribute('iedName');
+
+  const allConnectedAPsOfSameIED = Array.from(doc.querySelectorAll('SubNetwork > ConnectedAP'))
+  .filter(connectedAP => connectedAP.getAttribute('iedName') === iedName);
+
+  return [
+    {
+      title: get('wizard.title.selectAp'),
+      element,
+      primary: {
+        label: get('save'),
+        icon: 'save',
+        action: updateGSEAction(element),
+      },
+      content: [
+        html`
+         ${allConnectedAPsOfSameIED.map(connectedAP => 
+          html`
+            <mwc-button
+              label="${iedName} > ${connectedAP.getAttribute('apName')}"
+              @click=${() =>{console.log(connectedAP)}}
+              raised
+              ?disabled=${connectedAP === currentConnectedAP}
+              >
+              </mwc-button>
+          `)}
+        `
+      ],
+    },
+  ];
+}
