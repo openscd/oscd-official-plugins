@@ -13,7 +13,7 @@ import '@openscd/open-scd/src/action-icon.js';
 import { sizableSmvIcon } from '@openscd/open-scd/src/icons/icons.js';
 import { newWizardEvent } from '@openscd/open-scd/src/foundation.js';
 import { newActionEvent } from '@openscd/core/foundation/deprecated/editor.js';
-import { editSMvWizard } from '../../wizards/smv.js';
+import { editSMvWizard, moveSMVWizard } from '../../wizards/smv.js';
 
 @customElement('smv-editor')
 export class SmvEditor extends LitElement {
@@ -34,6 +34,10 @@ export class SmvEditor extends LitElement {
 
   private openEditWizard(): void {
     this.dispatchEvent(newWizardEvent(editSMvWizard(this.element)));
+  }
+
+  private openMoveSMVWizard():void{
+    this.dispatchEvent(newWizardEvent(moveSMVWizard(this.element, this.doc)));
   }
 
   remove(): void {
@@ -62,7 +66,13 @@ export class SmvEditor extends LitElement {
         mini
         icon="delete"
         @click="${() => this.remove()}}"
-      ></mwc-fab
-    ></action-icon>`;
+      ></mwc-fab>
+      <mwc-fab
+        slot="action"
+        mini
+        icon="forward"
+        @click="${() => this.openMoveSMVWizard()}}"
+      ></mwc-fab>
+      </action-icon>`;
   }
 }
