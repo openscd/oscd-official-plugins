@@ -19,6 +19,7 @@ import {
   ComplexAction,
   SimpleAction,
   EditorAction,
+  Move
 } from '@openscd/core/foundation/deprecated/editor.js';
 
 export function getMTimeAction(
@@ -170,7 +171,40 @@ export function editGseWizard(element: Element): Wizard {
   ];
 }
 
-export function moveGseWizard(element: Element, doc: XMLDocument): Wizard {
+
+let newlySelectedAP : null | Element = null;
+
+function setNewlySelectedAP(connectedAP: Element): void {
+
+  newlySelectedAP = connectedAP;
+}
+
+function moveGseToAnotherConnectedAP(element: Element): WizardActor {
+  
+  return (): EditorAction[] => {
+    const moveAction: Move = {
+      old:{
+        parent: element.parentElement!,
+        element,
+        reference: null,
+      },
+      new:{
+        parent: newlySelectedAP!,
+      }
+    }
+
+
+    return[
+      {
+        actions: [moveAction], 
+        title: "Move GSE to another ConnectedAP",
+      }
+    ]
+  } 
+}
+
+
+export function moveGSEWizard(element: Element, doc: XMLDocument): Wizard {
 
   const currentConnectedAP = element.closest('ConnectedAP');
   const iedName = currentConnectedAP?.getAttribute('iedName');
@@ -185,7 +219,7 @@ export function moveGseWizard(element: Element, doc: XMLDocument): Wizard {
       primary: {
         label: get('save'),
         icon: 'save',
-        action: updateGSEAction(element),
+        action: moveGseToAnotherConnectedAP(element),
       },
       content: [
         html`
@@ -193,7 +227,7 @@ export function moveGseWizard(element: Element, doc: XMLDocument): Wizard {
           html`
             <mwc-button
               label="${iedName} > ${connectedAP.getAttribute('apName')}"
-              @click=${() =>{console.log(connectedAP)}}
+              @click=${() => setNewlySelectedAP(connectedAP)}
               raised
               ?disabled=${connectedAP === currentConnectedAP}
               >

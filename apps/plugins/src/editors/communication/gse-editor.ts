@@ -13,7 +13,7 @@ import '@openscd/open-scd/src/action-icon.js';
 import { newWizardEvent } from '@openscd/open-scd/src/foundation.js';
 import { newActionEvent } from '@openscd/core/foundation/deprecated/editor.js';
 import { sizableGooseIcon } from '@openscd/open-scd/src/icons/icons.js';
-import { editGseWizard, moveGseWizard } from '../../wizards/gse.js';
+import { editGseWizard, moveGSEWizard } from '../../wizards/gse.js';
 
 
 @customElement('gse-editor')
@@ -38,7 +38,7 @@ export class GseEditor extends LitElement {
   }
   
   private openMoveGSEWizard():void {
-    this.dispatchEvent(newWizardEvent(moveGseWizard(this.element, this.doc)));
+    this.dispatchEvent(newWizardEvent(moveGSEWizard(this.element, this.doc)));
   }
 
   remove(): void {
