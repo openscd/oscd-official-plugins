@@ -14,6 +14,7 @@ import { sizableSmvIcon } from '@openscd/open-scd/src/icons/icons.js';
 import { newWizardEvent } from '@openscd/open-scd/src/foundation.js';
 import { newActionEvent } from '@openscd/core/foundation/deprecated/editor.js';
 import { editSMvWizard, moveSMVWizard } from '../../wizards/smv.js';
+import { getAllConnectedAPsOfSameIED } from './helpers.js';
 
 @customElement('smv-editor')
 export class SmvEditor extends LitElement {
@@ -54,6 +55,10 @@ export class SmvEditor extends LitElement {
   }
 
   render(): TemplateResult {
+
+        const allConnectedAPsOfSameIED = getAllConnectedAPsOfSameIED(this.element, this.doc);
+        const hasMoreThanOneConnectedAP = allConnectedAPsOfSameIED.length > 1;  
+
     return html`<action-icon label="${this.label}" .icon="${sizableSmvIcon}"
       ><mwc-fab
         slot="action"
@@ -67,12 +72,17 @@ export class SmvEditor extends LitElement {
         icon="delete"
         @click="${() => this.remove()}}"
       ></mwc-fab>
-      <mwc-fab
-        slot="action"
-        mini
-        icon="forward"
-        @click="${() => this.openMoveSMVWizard()}}"
-      ></mwc-fab>
+      ${hasMoreThanOneConnectedAP ? 
+        html`
+          <mwc-fab
+            slot="action"
+            mini
+            icon="forward"
+            @click="${() => this.openMoveSMVWizard()}}"
+            >
+          </mwc-fab>` 
+        : ''}
+      
       </action-icon>`;
   }
 }
