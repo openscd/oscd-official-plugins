@@ -14,6 +14,7 @@ import {
 import { ComplexAction, EditorAction, Move } from '@openscd/core/foundation/deprecated/editor.js';
 import { contentGseOrSmvWizard, updateAddress } from './address.js';
 import { html } from 'lit-element';
+import { getAllConnectedAPsOfSameIED, getCurrentConnectedAP } from '../editors/communication/helpers.js';
 
 export function updateSmvAction(element: Element): WizardActor {
   return (inputs: WizardInputElement[], wizard: Element): WizardAction[] => {
@@ -112,11 +113,10 @@ function moveSVMToAnotherConnectedAP(element: Element): WizardActor {
 
 export function moveSMVWizard(element: Element, doc: XMLDocument): Wizard {
 
-  const currentConnectedAP = element.closest('ConnectedAP');
+  const currentConnectedAP = getCurrentConnectedAP(element);
   const iedName = currentConnectedAP?.getAttribute('iedName');
 
-  const allConnectedAPsOfSameIED = Array.from(doc.querySelectorAll('SubNetwork > ConnectedAP'))
-  .filter(connectedAP => connectedAP.getAttribute('iedName') === iedName);
+  const allConnectedAPsOfSameIED = getAllConnectedAPsOfSameIED(element, doc);
 
   
 

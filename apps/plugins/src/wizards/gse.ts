@@ -21,6 +21,7 @@ import {
   EditorAction,
   Move
 } from '@openscd/core/foundation/deprecated/editor.js';
+import { getAllConnectedAPsOfSameIED, getCurrentConnectedAP } from '../editors/communication/helpers.js';
 
 export function getMTimeAction(
   type: 'MinTime' | 'MaxTime',
@@ -206,11 +207,10 @@ function moveGseToAnotherConnectedAP(element: Element): WizardActor {
 
 export function moveGSEWizard(element: Element, doc: XMLDocument): Wizard {
 
-  const currentConnectedAP = element.closest('ConnectedAP');
+  const currentConnectedAP = getCurrentConnectedAP(element);
   const iedName = currentConnectedAP?.getAttribute('iedName');
 
-  const allConnectedAPsOfSameIED = Array.from(doc.querySelectorAll('SubNetwork > ConnectedAP'))
-  .filter(connectedAP => connectedAP.getAttribute('iedName') === iedName);
+  const allConnectedAPsOfSameIED = getAllConnectedAPsOfSameIED(element, doc);
 
   return [
     {
