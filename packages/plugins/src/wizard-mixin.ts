@@ -54,14 +54,6 @@ export class WizardMixin extends LitElement {
     await this.wizardUI?.updateComplete;
     await this.wizardUI.dialog?.updateComplete;
     this.wizardUI.dialog?.focus();
-
-    // this.updateComplete.then(() =>
-    //   this.wizardUI?.updateComplete.then(() =>
-    //     this.wizardUI?.dialog?.updateComplete.then(() =>
-    //       this.wizardUI?.dialog?.focus()
-    //     )
-    //   )
-    // );
   };
 
   private onEditorAction = () => {
