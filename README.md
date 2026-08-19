@@ -1,3 +1,7 @@
+Plug-ins are (still) part of the OpenSCD repository and build seperately (seperate NPM packages).
+
+
+
 # `OpenSCD`
 
 [![Build Status](https://travis-ci.org/openscd/open-scd.svg?branch=main)](https://travis-ci.org/openscd/open-scd)
